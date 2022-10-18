@@ -11,6 +11,10 @@
     <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
     <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
     <PlatformTarget>x86</PlatformTarget>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>FoxProDbExtentionConnection</Title>
+    <Authors>$(AssemblyName),SoSVillalona</Authors>
+    <Description>first structure to facilitate the connection with the Visual Fox Pro database</Description>
   </PropertyGroup>
   <PropertyGroup Condition="'$(IsWindows)'=='true'">
     <DefineConstants>Windows</DefineConstants>
@@ -30,6 +34,15 @@
 
   <ItemGroup>
     <Folder Include="Prerequisites\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Prerequisites\VfpEntityFrameworkProvider.msi">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Prerequisites\VFPOLEDBSetup.msi">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

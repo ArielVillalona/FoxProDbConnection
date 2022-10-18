@@ -17,10 +17,13 @@ namespace FoxProDbExtentionConnection
              * http://vfphelp.com/vfp9/_59k0sp3t9.htm
              */
 #if Windows
-            using OleDbCommand newCommand = command.Connection.CreateCommand();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                using OleDbCommand newCommand = command.Connection.CreateCommand();
                 newCommand.CommandType = CommandType.Text;
                 newCommand.CommandText = "SET NULL OFF;";
                 newCommand.ExecuteNonQuery();
+            }
 #endif
         }
 

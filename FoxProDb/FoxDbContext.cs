@@ -34,6 +34,7 @@ namespace FoxProDbExtentionConnection
         #region FUNCTION
         public static DataSet Exec(string function, string database, Dictionary<string, int> parametros)
         {
+#if Windows
             DataTable dataset = new();
             string fullconection = $"Provider = VFPOLEDB.1; Data Source = E:\\Share\\datatest\\DATA\\{database}.dbc;";
             using OleDbConnection connection = new(fullconection);
@@ -47,6 +48,7 @@ namespace FoxProDbExtentionConnection
             OleDbDataAdapter adapter = new(command);
             adapter.Fill(dataset);
             return new DataSet();
+#endif
         }
         #endregion
 
