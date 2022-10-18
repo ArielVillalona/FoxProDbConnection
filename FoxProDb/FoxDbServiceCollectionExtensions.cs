@@ -14,7 +14,7 @@ namespace FoxProDbExtentionConnection
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
-        public static IServiceCollection AddFoxDb(this IServiceCollection services, Action<FoxDbOptions> connectionString)
+        public static IServiceCollection AddFoxDb([NotNull]this IServiceCollection services, [NotNull] Action<FoxDbOptions> connectionString)
         {
             if (services == null)
             {
@@ -28,11 +28,10 @@ namespace FoxProDbExtentionConnection
 
             services.Configure(connectionString);
             services.TryAdd(ServiceDescriptor.Scoped<IFoxDbContext, FoxDbContext>());
-
             return services;
         }
 
-        public static IServiceCollection AddFoxDb(this IServiceCollection services, Action<IServiceProvider, FoxDbOptions> configuration)
+        public static IServiceCollection AddFoxDb([NotNull] this IServiceCollection services, [NotNull] Action<IServiceProvider, FoxDbOptions> configuration)
         {
             if (services == null)
             {

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace FoxProDbExtentionConnection
 {
-    public class FoxDbContext : IFoxDbContext, IDisposable, IAsyncDisposable
+    internal class FoxDbContext : IFoxDbContext, IDisposable, IAsyncDisposable
     {
         #region Properties
         private readonly OleDbConnection _connection;
@@ -22,7 +22,7 @@ namespace FoxProDbExtentionConnection
             return connection;
         }
 
-        public FoxDbContext(IOptions<FoxDbOptions> options)
+        internal FoxDbContext(IOptions<FoxDbOptions> options)
         {
             ConnectionString = options.Value.DataFolderString;
             if (ConnectionString == string.Empty) // TODO: This is just for testing purpose. Should be deleted.
@@ -32,7 +32,7 @@ namespace FoxProDbExtentionConnection
             _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? FarmaDbContextAsync(ConnectionString).Result:null;
         }
 
-        public FoxDbContext(string connectionString)
+        internal FoxDbContext(string connectionString)
         {
             if (connectionString == string.Empty) // TODO: This is just for testing purpose. Should be deleted.
             {
