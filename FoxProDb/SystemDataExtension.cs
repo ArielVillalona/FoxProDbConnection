@@ -9,7 +9,7 @@ namespace FoxProDbExtentionConnection
 {
     public static class SystemDataExtension
     {
-        public static async Task<IEnumerable<T>> ToListAsync<T>(this DataSet ds) where T : class
+        public static async Task<IEnumerable<T>> ToListAsync<T>(this DataSet ds)
         {
             if (ds.Tables[0].Rows.Count > 0)
             {
@@ -25,7 +25,7 @@ namespace FoxProDbExtentionConnection
             }
             return default;
         }
-        public static IEnumerable<T> ToList<T>(this DataSet ds) where T : class
+        public static IEnumerable<T> ToList<T>(this DataSet ds)
         {
             if (ds.Tables[0].Rows.Count > 0)
             {
@@ -89,7 +89,7 @@ namespace FoxProDbExtentionConnection
             return obj;
         }
 
-        private static List<T> ConvertToList<T>(this DataTable dt) where T : class
+        private static List<T> ConvertToList<T>(this DataTable dt)
         {
             List<T> data = new();
             foreach (DataRow row in dt.Rows)

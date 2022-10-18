@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FoxProDbExtentionConnection
 {
@@ -13,16 +14,41 @@ namespace FoxProDbExtentionConnection
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
-        public static IServiceCollection AddFoxDb(this IServiceCollection services,string dataFolderString)
+        public static IServiceCollection AddFoxDb(this IServiceCollection services, Action<FoxDbOptions> connectionString)
         {
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.TryAdd(ServiceDescriptor.Scoped(_ => new FoxDbContext(dataFolderString)));
+            if (connectionString == null)
+            {
+                throw new ArgumentNullException(nameof(connectionString));
+            }
+
+            services.Configure(connectionString);
+            services.TryAdd(ServiceDescriptor.Scoped<IFoxDbContext, FoxDbContext>());
 
             return services;
         }
+
+        public static IServiceCollection AddFoxDb(this IServiceCollection services, Action<IServiceProvider, FoxDbOptions> configuration)
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            //services.Configure(configuration.);
+            services.TryAdd(ServiceDescriptor.Scoped<IFoxDbContext, FoxDbContext>());
+
+            return services;
+        }
+
     }
 }

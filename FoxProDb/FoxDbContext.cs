@@ -1,24 +1,35 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System.Data;
 using System.Data.OleDb;
 using System.Runtime.InteropServices;
 
 namespace FoxProDbExtentionConnection
 {
-    public class FoxDbContext : IDisposable, IAsyncDisposable
+    public class FoxDbContext : IFoxDbContext, IDisposable, IAsyncDisposable
     {
         #region Properties
         private readonly OleDbConnection _connection;
         private const int MIN_SUCCESSFUL_UPDATE = 1;
+        private readonly string ConnectionString;
         #endregion
 
         #region Constructors
-
-        public static async Task<OleDbConnection> FarmaDbContextAsync(string connectionString, CancellationToken cancellationToken = default)
+        private static async Task<OleDbConnection> FarmaDbContextAsync(string connectionString, CancellationToken cancellationToken = default)
         {
             var connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)? new OleDbConnection(connectionString):null;
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
             return connection;
+        }
+
+        public FoxDbContext(IOptions<FoxDbOptions> options)
+        {
+            ConnectionString = options.Value.DataFolderString;
+            if (ConnectionString == string.Empty) // TODO: This is just for testing purpose. Should be deleted.
+            {
+                throw new ArgumentNullException(nameof(ConnectionString));
+            }
+            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? FarmaDbContextAsync(ConnectionString).Result:null;
         }
 
         public FoxDbContext(string connectionString)
@@ -27,7 +38,7 @@ namespace FoxProDbExtentionConnection
             {
                 throw new ArgumentNullException(nameof(connectionString));
             }
-            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? FarmaDbContextAsync(connectionString).Result:null;
+            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? FarmaDbContextAsync(ConnectionString).Result : null;
         }
         #endregion
 
@@ -53,14 +64,15 @@ namespace FoxProDbExtentionConnection
         #endregion
 
         #region Select Method
-        public async Task<T> GetFirstAsync<T>(string query) where T : class
+        public async Task<T> GetFirstAsync<T>(string query)
         {
             DataSet dataSet = new();
             using OleDbDataAdapter _adapter = new(query, _connection);
             _ = _adapter.Fill(dataSet);
             return await dataSet.FirstAsync<T>();
         }
-        public async Task<IEnumerable<T>> GetListAsync<T>(string query) where T : class
+
+        public async Task<IEnumerable<T>> GetListAsync<T>(string query)
         {
             DataSet dataSet = new();
             using OleDbDataAdapter _adapter = new(query, _connection);
@@ -78,7 +90,7 @@ namespace FoxProDbExtentionConnection
             return dataSet;
         }
 
-        public static IEnumerable<Dictionary<string, object>> Serialize(IDataReader reader)
+        private static IEnumerable<Dictionary<string, object>> Serialize(IDataReader reader)
         {
             var results = new List<Dictionary<string, object>>();
             var cols = new List<string>();
@@ -90,6 +102,7 @@ namespace FoxProDbExtentionConnection
 
             return results;
         }
+
         private static Dictionary<string, object> SerializeRow(IEnumerable<string> cols, IDataReader reader)
         {
             var result = new Dictionary<string, object>();
@@ -98,7 +111,7 @@ namespace FoxProDbExtentionConnection
             return result;
         }
 
-        public async Task<IEnumerable<T>> GetReader<T>(string query) where T : class
+        public async Task<IEnumerable<T>> GetReader<T>(string query)
         {
             try
             {
