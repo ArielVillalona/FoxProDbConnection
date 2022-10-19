@@ -72,7 +72,7 @@ namespace FoxProDbExtentionConnection
                         if (pro.PropertyType == typeof(Int32))
                         {
                             Regex regex = new Regex("^(?:-(?:[1-9](?:\\d{0,2}(?:,\\d{3})+|\\d*))|(?:0|(?:[1-9](?:\\d{0,2}(?:,\\d{3})+|\\d*))))(?:.\\d+|)$");
-                            if (regex.IsMatch(columnData.ToString()))
+                            if (regex.IsMatch(columnData.ToString()??"0"))
                                 pro.SetValue(obj, Convert.ChangeType(columnData, pro.PropertyType), null);
                             else
                                 throw new Exception();

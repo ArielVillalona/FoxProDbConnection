@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
@@ -22,18 +23,24 @@ namespace FoxProDbExtentionConnection
         private static async Task<OleDbConnection> FarmaDbContextAsync(string connectionString, CancellationToken cancellationToken = default)
         {
             var connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new OleDbConnection(connectionString) : null;
-            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-            return connection;
+            if (connection != null)
+            {
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+                return connection;
+            }
+            throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
         }
 
         public FoxDbContext(IOptions<FoxDbOptions> options)
         {
-            ConnectionString = options.Value.DataFolderString;
-            if (ConnectionString == string.Empty) // TODO: This is just for testing purpose. Should be deleted.
+            if (string.IsNullOrEmpty(options.Value.DataFolderString)) // TODO: This is just for testing purpose. Should be deleted.
             {
-                throw new ArgumentNullException(nameof(ConnectionString));
+                throw new ArgumentNullException(nameof(options.Value.DataFolderString));
             }
-            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? FarmaDbContextAsync(ConnectionString).Result : null;
+            ConnectionString = options.Value.DataFolderString;
+            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 
+                FarmaDbContextAsync(ConnectionString).Result : 
+                throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
         }
 
         public FoxDbContext(string connectionString)
@@ -42,7 +49,10 @@ namespace FoxProDbExtentionConnection
             {
                 throw new ArgumentNullException(nameof(connectionString));
             }
-            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? FarmaDbContextAsync(connectionString).Result : null;
+            ConnectionString = connectionString;
+            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 
+                FarmaDbContextAsync(ConnectionString).Result :
+                throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
         }
         #endregion
 
@@ -51,10 +61,18 @@ namespace FoxProDbExtentionConnection
         #region FUNCTION
         public static DataSet Exec(string function, string database, Dictionary<string, int> parametros)
         {
-#if Windows
+            if (string.IsNullOrEmpty(function)) {
+                throw new ArgumentNullException(nameof(function));
+            }
+
+            if (string.IsNullOrEmpty(database))
+            {
+                throw new ArgumentNullException(nameof(database));
+            }
+
             DataTable dataset = new();
-            string fullconection = $"Provider = VFPOLEDB.1; Data Source = E:\\Share\\datatest\\DATA\\{database}.dbc;";
-            using OleDbConnection connection = new(fullconection);
+            string fullconection = $"Provider = VFPOLEDB.1; Data Source = {database}.dbc;";
+            using OleDbConnection connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(fullconection): throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
             using OleDbCommand command = connection.CreateCommand();
             command.CommandText = function;
             command.CommandType = CommandType.StoredProcedure;
@@ -65,7 +83,7 @@ namespace FoxProDbExtentionConnection
             OleDbDataAdapter adapter = new(command);
             adapter.Fill(dataset);
             return new DataSet();
-#endif
+
         }
         #endregion
 
@@ -73,7 +91,7 @@ namespace FoxProDbExtentionConnection
         public async Task<T> GetFirstAsync<T>(string query)
         {
             DataSet dataSet = new();
-            using OleDbDataAdapter _adapter = new(query, _connection);
+            using OleDbDataAdapter _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection): throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
             _ = _adapter.Fill(dataSet);
             return await dataSet.FirstAsync<T>();
         }
@@ -81,7 +99,7 @@ namespace FoxProDbExtentionConnection
         public async Task<IEnumerable<T>> GetListAsync<T>(string query)
         {
             DataSet dataSet = new();
-            using OleDbDataAdapter _adapter = new(query, _connection);
+            using OleDbDataAdapter _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
             _ = _adapter.Fill(dataSet);
             return await dataSet.ToListAsync<T>();
         }
@@ -89,7 +107,7 @@ namespace FoxProDbExtentionConnection
         public async Task<DataSet> GetDataSet(string query)
         {
             var dataSet = new DataSet();
-            using (OleDbDataAdapter _adapter = new(query, _connection))
+            using (OleDbDataAdapter _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM"))
             {
                 await Task.FromResult(_adapter.Fill(dataSet));
             }
@@ -122,7 +140,7 @@ namespace FoxProDbExtentionConnection
             try
             {
                 DataSet ds = new();
-                using (OleDbCommand command = new(query, _connection))
+                using (OleDbCommand command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM"))
                 {
                     _connection.Open();
                     using OleDbDataReader reader = command.ExecuteReader();
@@ -147,7 +165,7 @@ namespace FoxProDbExtentionConnection
             try
             {
                 var dataSet = new DataSet();
-                using (OleDbDataAdapter _adapter = new(query, _connection))
+                using (OleDbDataAdapter _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM"))
                 {
                     await Task.FromResult(_adapter.Fill(dataSet));
                 }
@@ -167,7 +185,7 @@ namespace FoxProDbExtentionConnection
             int result = 0;
             try
             {
-                using (OleDbCommand command = new(query, _connection))
+                using (OleDbCommand command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM"))
                 {
                     result = await command.ExecuteNonQueryAsync();
                 };
@@ -186,7 +204,7 @@ namespace FoxProDbExtentionConnection
         {
             await Task.Run(async () =>
             {
-                using OleDbCommand command = new(query, _connection);
+                using OleDbCommand command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
                 command.SkipValidateNullOnSave();
                 var update = await command.ExecuteNonQueryAsync();
                 if (update >= MIN_SUCCESSFUL_UPDATE)
@@ -202,7 +220,7 @@ namespace FoxProDbExtentionConnection
         {
             await Task.Run(async () =>
             {
-                using OleDbCommand command = new(sql, _connection);
+                using OleDbCommand command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(sql, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
                 if (await command.ExecuteNonQueryAsync() > 0)
                 {
                     return;
@@ -213,11 +231,11 @@ namespace FoxProDbExtentionConnection
 
         #region Dinamic Insert
         //TODO: Dinamic Insert
-        public OleDbDataAdapter DataInsert(string tabla, string[] columns)
+        public OleDbDataAdapter? DataInsert(string tabla, string[] columns)
         {
             string commandSql = $"INSERT INTO {tabla} (";
             string values = "VALUES(";
-            using (var command = new OleDbCommand(commandSql + values, _connection))
+            using (var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new OleDbCommand(commandSql + values, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM"))
             {
                 for (int increment = 0; increment < columns.Length; increment++)
                 {
@@ -232,7 +250,7 @@ namespace FoxProDbExtentionConnection
                 values += ')';
                 commandSql += $" {values}";
 
-                string query = "INSERT INTO inv_diferenciaconteo VALUES(1,9055,2,0,4,5,CTOD('09/08/20'),1,'10:14 AM',0,553.87,'PAQUETE','037000862093',0,0)";
+                string query = "ejemplo: INSERT INTO inv_diferenciaconteo VALUES(1,9055,2,0,4,5,CTOD('09/08/20'),1,'10:14 AM',0,553.87,'PAQUETE','037000862093',0,0)";
                 command.CommandText = query;
 
                 command.ExecuteNonQuery();
