@@ -40,6 +40,9 @@ namespace FoxProDbExtentionConnection
         }
         static void test()
         {
+            /*
+                EXECSCRIPT([set delete on] +CHR(13)+ [SET FILTER TO refpedido=179987]+CHR(13)+ [REPLACE estado WITH 108]+CHR(13)+[BROWSE LAST])
+             */
             Console.WriteLine("Starting program execution...");
 
             string connectionString = @"Provider=VFPOLEDB.1;Data Source=h:\dave\";
