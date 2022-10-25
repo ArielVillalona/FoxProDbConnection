@@ -11,6 +11,14 @@ using System.Threading.Tasks;
 
 namespace FoxProDbExtentionConnection
 {
+    /*
+     * ODBC
+     Driver={Microsoft Visual FoxPro Driver};SourceType=DBC;SourceDB=c:myvfpdb.dbc;Exclusive=No;NULL=NO;
+            Collate=Machine;BACKGROUNDFETCH=NO;DELETED=NO"
+
+     * OLDB
+     
+     */
     public class FoxDbContext : IFoxDbContext, IDisposable, IAsyncDisposable
     {
         #region Properties
@@ -93,6 +101,17 @@ namespace FoxProDbExtentionConnection
             DataSet dataSet = new();
             using OleDbDataAdapter _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection): throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
             _ = _adapter.Fill(dataSet);
+            return await dataSet.FirstAsync<T>();
+        }
+
+        public async Task<T> GetFirstAsyncTestDeletedOn<T>(string query)
+        {
+            DataSet dataSet = new();
+            using OleDbCommand _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+            _adapter.SetDelete();
+            var re = _adapter.ExecuteReader();
+            dataSet.Tables.Add(nameof(T));
+            dataSet.Tables[0].Load(re);
             return await dataSet.FirstAsync<T>();
         }
 

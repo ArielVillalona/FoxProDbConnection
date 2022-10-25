@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.OleDb;
 using System.Runtime.InteropServices;
 
@@ -36,6 +37,33 @@ namespace FoxProDbExtentionConnection
                 newCommand.CommandText = "SET DELETED ON;";
                 newCommand.ExecuteNonQuery();
             }
+        }
+        static void test()
+        {
+            Console.WriteLine("Starting program execution...");
+
+            string connectionString = @"Provider=VFPOLEDB.1;Data Source=h:\dave\";
+
+            using (OleDbConnection connection = new OleDbConnection(connectionString))
+            {
+                using (OleDbCommand scriptCommand = connection.CreateCommand())
+                {
+                    connection.Open();
+
+                    string vfpScript = @"SET EXCLUSIVE ON
+                                DELETE FROM test WHERE id = 5
+                                PACK";
+
+                    scriptCommand.CommandType = CommandType.StoredProcedure;
+                    scriptCommand.CommandText = "ExecScript";
+                    scriptCommand.Parameters.Add("myScript", OleDbType.Char).Value = vfpScript;
+                    scriptCommand.ExecuteNonQuery();
+                }
+            }
+
+            Console.WriteLine("End program execution...");
+            Console.WriteLine("Press any key to continue");
+            Console.ReadLine();
         }
     }
 }

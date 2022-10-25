@@ -13,6 +13,7 @@ namespace FoxProDbExtentionConnection
         Task Delete(string sql);
         Task<DataSet> GetDataSet(string query);
         Task<T> GetFirstAsync<T>(string query);
+        Task<T> GetFirstAsyncTestDeletedOn<T>(string query);
         Task<IEnumerable<T>> GetList<T>(string query) where T : class;
         Task<IEnumerable<T>> GetListAsync<T>(string query);
         Task<IEnumerable<T>> GetReader<T>(string query);
