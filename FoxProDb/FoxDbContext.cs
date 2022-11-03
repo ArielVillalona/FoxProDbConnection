@@ -328,6 +328,17 @@ namespace FoxProDbExtentionConnection
             return dataSet;
         }
 
+        public async Task<T> GetFirstAsyncTestDeletedOn<T>(string query)
+        {
+            DataSet dataSet = new DataSet();
+            using OleDbCommand _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new OleDbCommand(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+            _adapter.SetDelete();
+            var re = _adapter.ExecuteReader();
+            dataSet.Tables.Add(nameof(T));
+            dataSet.Tables[0].Load(re);
+            return await dataSet.FirstAsync<T>();
+        }
+
         private static IEnumerable<Dictionary<string, object>> Serialize(IDataReader reader)
         {
             var results = new List<Dictionary<string, object>>();

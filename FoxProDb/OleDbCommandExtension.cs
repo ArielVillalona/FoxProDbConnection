@@ -53,9 +53,7 @@ namespace FoxProDbExtentionConnection
                 {
                     connection.Open();
 
-                    string vfpScript = @"SET EXCLUSIVE ON
-                                DELETE FROM test WHERE id = 5
-                                PACK";
+                    string vfpScript = @"[set delete on] +CHR(13)+ [SET FILTER TO refpedido=179987]+CHR(13)+ [REPLACE estado WITH 108]+CHR(13)+[BROWSE LAST]";
 
                     scriptCommand.CommandType = CommandType.StoredProcedure;
                     scriptCommand.CommandText = "ExecScript";
