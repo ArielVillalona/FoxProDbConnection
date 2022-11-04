@@ -77,6 +77,13 @@ namespace FoxProDbExtentionConnection
                             else
                                 throw new Exception();
                         }
+                        else if(pro.PropertyType == typeof(DateTime) || pro.PropertyType == typeof(DateTime?))
+                        {
+                            if (string.IsNullOrEmpty(columnData.ToString()))
+                            {
+                                pro.SetValue(obj, Convert.ChangeType(new DateTime(), pro.PropertyType), null);
+                            }
+                        }
                         else
                             pro.SetValue(obj, Convert.ChangeType(columnData, pro.PropertyType), null);
                     }

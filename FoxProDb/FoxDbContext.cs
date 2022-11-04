@@ -96,15 +96,15 @@ namespace FoxProDbExtentionConnection
         #endregion
 
         #region Select Method
-        public async Task<T> GetFirstAsync<T>(string query)
-        {
-            DataSet dataSet = new();
-            using OleDbDataAdapter _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection): throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
-            _ = _adapter.Fill(dataSet);
-            return await dataSet.FirstAsync<T>();
-        }
+        //public async Task<T> GetFirstAsync<T>(string query)
+        //{
+        //    DataSet dataSet = new();
+        //    using OleDbDataAdapter _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection): throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+        //    _ = _adapter.Fill(dataSet);
+        //    return await dataSet.FirstAsync<T>();
+        //}
 
-        public async Task<T> GetFirstAsyncTestDeletedOn<T>(string query)
+        public async Task<T> GetFirstAsync<T>(string query)
         {
             DataSet dataSet = new();
             using OleDbCommand _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
@@ -118,9 +118,34 @@ namespace FoxProDbExtentionConnection
         public async Task<IEnumerable<T>> GetListAsync<T>(string query)
         {
             DataSet dataSet = new();
-            using OleDbDataAdapter _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
-            _ = _adapter.Fill(dataSet);
+            using OleDbCommand _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+            _adapter.SetDelete();
+            var re = _adapter.ExecuteReader();
+            dataSet.Tables.Add(nameof(T));
+            dataSet.Tables[0].Load(re);
             return await dataSet.ToListAsync<T>();
+        }
+
+        public string GetFirstAsyncJson(string query)
+        {
+            DataSet dataSet = new();
+            using OleDbCommand _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+            _adapter.SetDelete();
+            var re = _adapter.ExecuteReader();
+            dataSet.Tables.Add("JSON");
+            dataSet.Tables[0].Load(re);
+            return JsonConvert.SerializeObject(dataSet);
+        }
+
+        public string GetListAsyncJson(string query)
+        {
+            DataSet dataSet = new();
+            using OleDbCommand _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+            _adapter.SetDelete();
+            var re = _adapter.ExecuteReader();
+            dataSet.Tables.Add("JSON");
+            dataSet.Tables[0].Load(re);
+            return JsonConvert.SerializeObject(dataSet);
         }
 
         public async Task<DataSet> GetDataSet(string query)
@@ -316,6 +341,29 @@ namespace FoxProDbExtentionConnection
             using OleDbDataAdapter _adapter = new OleDbDataAdapter(query, _connection);
             _ = _adapter.Fill(dataSet);
             return await dataSet.ToListAsync<T>();
+        }
+
+        public string GetFirstAsyncJson(string query)
+        {
+            DataSet dataSet = new DataSet();
+            using OleDbCommand _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new OleDbCommand(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+            _adapter.SetDelete();
+            var re = _adapter.ExecuteReader();
+            dataSet.Tables.Add("DATA");
+            dataSet.Tables[0].Load(re);
+            return JsonConvert.SerializeObject(dataSet);
+        }
+
+        public string GetListAsyncJson(string query)
+        {
+            DataSet dataSet = new DataSet("DataSet");
+            using OleDbCommand _adapter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new OleDbCommand(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+            _adapter.SetDelete();
+            var re = _adapter.ExecuteReader();
+            dataSet.Namespace = "DATA";
+            dataSet.Tables.Add("DATA");
+            dataSet.Tables[0].Load(re);
+            return JsonConvert.SerializeObject(dataSet,Formatting.Indented);
         }
 
         public async Task<DataSet> GetDataSet(string query)

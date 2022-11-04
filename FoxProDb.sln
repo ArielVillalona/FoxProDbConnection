@@ -5,6 +5,10 @@ VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FoxProDbExtentionConnection", "FoxProDb\FoxProDbExtentionConnection.csproj", "{44356A83-42A2-4A36-A6EC-973CAA9372C2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{B1839F17-93FD-4B79-86CE-2B1C140E210D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "Sample\API\API.csproj", "{CCCF5306-34D5-4B34-908B-DCB1C28E14E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{44356A83-42A2-4A36-A6EC-973CAA9372C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44356A83-42A2-4A36-A6EC-973CAA9372C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44356A83-42A2-4A36-A6EC-973CAA9372C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCCF5306-34D5-4B34-908B-DCB1C28E14E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCCF5306-34D5-4B34-908B-DCB1C28E14E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCCF5306-34D5-4B34-908B-DCB1C28E14E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCCF5306-34D5-4B34-908B-DCB1C28E14E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CCCF5306-34D5-4B34-908B-DCB1C28E14E2} = {B1839F17-93FD-4B79-86CE-2B1C140E210D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4346ADE3-BB5B-4276-B493-09F9E5ED5E34}
