@@ -2,6 +2,8 @@
 using FoxProDbExtentionConnection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Data.OleDb;
+using System.Data;
 
 namespace API.Controllers
 {
@@ -29,6 +31,14 @@ namespace API.Controllers
         {
             var result = await _foxDbContext.GetFirstAsync<Orders>($"SELECT * FROM orders where orderId={orderId}");
             return Ok(result);
+        }
+
+        [HttpGet("/test")]
+        public async Task<IActionResult> Test() 
+        {
+            IFoxDbContext foxDb = new FoxDbContext("Provider = VFPOLEDB.1; Data Source = c:\\basesdedatosfoxpro\\datacentro1; Collating Sequence = general;");
+            var result = await foxDb.Update("ExecScript([set delete on] +CHR(13)+ [update ped_respedidos set estado=103 where refpedido=170534])");
+            return Ok();
         }
     }
 }
