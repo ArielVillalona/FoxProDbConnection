@@ -19,5 +19,6 @@ namespace FoxProDbExtentionConnection
         string GetListAsyncJson(string query);
         Task<IEnumerable<T>> GetReader<T>(string query);
         Task<int> Update(string query);
+        int UpdateNotasync(string query);
     }
 }

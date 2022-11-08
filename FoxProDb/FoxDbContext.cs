@@ -241,6 +241,24 @@ namespace FoxProDbExtentionConnection
             }
             return result;
         }
+
+        public int UpdateNotasync(string query)
+        {
+            int result = 0;
+            try
+            {
+                using (OleDbCommand command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM"))
+                {
+                    result = command.ExecuteNonQuery();
+                };
+
+            }
+            catch (OleDbException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return result;
+        }
         #endregion
 
         #region Insert Method
@@ -461,6 +479,24 @@ namespace FoxProDbExtentionConnection
                 using (OleDbCommand command = new OleDbCommand(query, _connection))
                 {
                     result = await command.ExecuteNonQueryAsync();
+                };
+
+            }
+            catch (OleDbException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return result;
+        }
+
+        public int UpdateNotasync(string query)
+        {
+            int result = 0;
+            try
+            {
+                using (OleDbCommand command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new OleDbCommand(query, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM"))
+                {
+                    result = command.ExecuteNonQuery();
                 };
 
             }

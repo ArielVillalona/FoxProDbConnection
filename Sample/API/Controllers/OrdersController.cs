@@ -34,10 +34,12 @@ namespace API.Controllers
         }
 
         [HttpGet("/test")]
-        public async Task<IActionResult> Test() 
+        public IActionResult Test() 
         {
-            IFoxDbContext foxDb = new FoxDbContext("Provider = VFPOLEDB.1; Data Source = c:\\basesdedatosfoxpro\\datacentro1; Collating Sequence = general;");
-            var result = await foxDb.Update("ExecScript([set delete on] +CHR(13)+ [update ped_respedidos set estado=103 where refpedido=170534])");
+            IFoxDbContext foxDb = new FoxDbContext("Provider = VFPOLEDB.1; Data Source = c:\\basesdedatosfoxpro\\datacentro1; Collating Sequence = Machine;");
+            var result0 = foxDb.Update("UPDATE ped_respedidos SET estado=103 WHERE STR(refpedido,10)=STR(170534,10)");
+            var result1 = foxDb.Update("UPDATE ped_detpedidos SET estado=3 WHERE refpedido = 170534 AND refprod=10454 AND refpres = 2");
+            var result2 = foxDb.Update("UPDATE ped_detpedidos SET estado=5 WHERE STR(refpedido,10)+STR(refprod,6)+STR(refpres,2)=STR(170534,10)+STR(10454,6)+STR(2,2)");
             return Ok();
         }
     }
