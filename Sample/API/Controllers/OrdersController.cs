@@ -23,7 +23,7 @@ namespace API.Controllers
         {
             var result = await _foxDbContext.GetListAsync<Orders>("SELECT * FROM orders");
             var result2 = _foxDbContext.GetListAsyncJson("SELECT * FROM orders");
-            return Ok(result2) ;
+            return Ok(result) ;
         }
 
         [HttpGet("{orderId}")]
