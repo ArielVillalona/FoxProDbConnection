@@ -19,6 +19,7 @@ namespace FoxProDbExtentionConnection
      * OLDB
      
      */
+#nullable enable
     public class FoxDbContext : IFoxDbContext, IDisposable, IAsyncDisposable
     {
         #region Properties
@@ -41,13 +42,15 @@ namespace FoxProDbExtentionConnection
 
         public FoxDbContext(IOptions<FoxDbOptions> options)
         {
+            ArgumentNullException.ThrowIfNull(options);
+
             if (string.IsNullOrEmpty(options.Value.DataFolderString)) // TODO: This is just for testing purpose. Should be deleted.
             {
-                throw new ArgumentNullException(nameof(options.Value.DataFolderString));
+                throw new Exception(nameof(options.Value.DataFolderString));
             }
             ConnectionString = options.Value.DataFolderString;
-            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 
-                FarmaDbContextAsync(ConnectionString).Result : 
+            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
+                FarmaDbContextAsync(ConnectionString).Result :
                 throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
         }
 
@@ -58,7 +61,7 @@ namespace FoxProDbExtentionConnection
                 throw new ArgumentNullException(nameof(connectionString));
             }
             ConnectionString = connectionString;
-            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 
+            _connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
                 FarmaDbContextAsync(ConnectionString).Result :
                 throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
         }
@@ -67,7 +70,8 @@ namespace FoxProDbExtentionConnection
         #region FUNCTION
         public static DataSet Exec(string function, string database, Dictionary<string, int> parametros)
         {
-            if (string.IsNullOrEmpty(function)) {
+            if (string.IsNullOrEmpty(function))
+            {
                 throw new ArgumentNullException(nameof(function));
             }
 
@@ -78,13 +82,14 @@ namespace FoxProDbExtentionConnection
 
             DataTable dataset = new();
             string fullconection = $"Provider = VFPOLEDB.1; Data Source = {database}.dbc;";
-            using OleDbConnection connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(fullconection): throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+            using OleDbConnection connection = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new(fullconection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
             using OleDbCommand command = connection.CreateCommand();
             command.CommandText = function;
             command.CommandType = CommandType.StoredProcedure;
             foreach (var items in parametros)
             {
-                command.Parameters.Add(items.Key, items.Value);
+                //command.Parameters.Add(items.Key, items.Value); //TODO: must delete when finish test
+                command.Parameters.AddWithValue(items.Key, items.Value);
             }
             OleDbDataAdapter adapter = new(command);
             adapter.Fill(dataset);
@@ -156,17 +161,22 @@ namespace FoxProDbExtentionConnection
             return dataSet;
         }
 
-        private static IEnumerable<Dictionary<string, object>> Serialize(IDataReader reader)
+        private static List<Dictionary<string, object>> Serialize(OleDbDataReader reader)
         {
-            var results = new List<Dictionary<string, object>>();
-            var cols = new List<string>();
-            for (var i = 0; i < reader.FieldCount; i++)
-                cols.Add(reader.GetName(i));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var results = new List<Dictionary<string, object>>();
+                var cols = new List<string>();
+                for (var i = 0; i < reader.FieldCount; i++)
+                    cols.Add(reader.GetName(i));
 
-            while (reader.Read())
-                results.Add(SerializeRow(cols, reader));
+                while (reader.Read())
+                    results.Add(SerializeRow(cols, reader));
 
-            return results;
+                return results;
+            }
+            else
+                throw new Exception("JUST WINDOWS PLAFORM");
         }
 
         private static Dictionary<string, object> SerializeRow(IEnumerable<string> cols, IDataReader reader)
@@ -295,27 +305,25 @@ namespace FoxProDbExtentionConnection
         {
             string commandSql = $"INSERT INTO {tabla} (";
             string values = "VALUES(";
-            using (var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new OleDbCommand(commandSql + values, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM"))
+            using var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new OleDbCommand(commandSql + values, _connection) : throw new Exception("THIS METHOD ONLY WORK ON WINDOWS SYSTEM");
+            for (int increment = 0; increment < columns.Length; increment++)
             {
-                for (int increment = 0; increment < columns.Length; increment++)
-                {
-                    commandSql += columns[increment] + ",";
-                    values += "?,";
-                    command.Parameters.Add(columns[increment], OleDbType.Char, 5, columns[increment]);
-                }
-                //command = new OleDbCommand($"INSERT INTO {tabla} (CustomerID, CompanyName) VALUES (?, ?)", _conn);
-                commandSql = commandSql.TrimEnd(',');
-                commandSql += ')';
-                values = values.TrimEnd(',');
-                values += ')';
-                commandSql += $" {values}";
-
-                string query = "ejemplo: INSERT INTO inv_diferenciaconteo VALUES(1,9055,2,0,4,5,CTOD('09/08/20'),1,'10:14 AM',0,553.87,'PAQUETE','037000862093',0,0)";
-                command.CommandText = query;
-
-                command.ExecuteNonQuery();
-                _connection.Close();
+                commandSql += columns[increment] + ",";
+                values += "?,";
+                command.Parameters.Add(columns[increment], OleDbType.Char, 5, columns[increment]);
             }
+            //command = new OleDbCommand($"INSERT INTO {tabla} (CustomerID, CompanyName) VALUES (?, ?)", _conn);
+            commandSql = commandSql.TrimEnd(',');
+            commandSql += ')';
+            values = values.TrimEnd(',');
+            values += ')';
+            commandSql += $" {values}";
+
+            string query = "ejemplo: INSERT INTO inv_diferenciaconteo VALUES(1,9055,2,0,4,5,CTOD('09/08/20'),1,'10:14 AM',0,553.87,'PAQUETE','037000862093',0,0)";
+            command.CommandText = query;
+
+            command.ExecuteNonQuery();
+            _connection.Close();
             return null;//_adapter;
         }
         #endregion

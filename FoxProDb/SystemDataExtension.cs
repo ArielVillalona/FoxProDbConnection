@@ -71,7 +71,7 @@ namespace FoxProDbExtentionConnection
                     {
                         if (pro.PropertyType == typeof(Int32))
                         {
-                            Regex regex = new Regex("^(?:-(?:[1-9](?:\\d{0,2}(?:,\\d{3})+|\\d*))|(?:0|(?:[1-9](?:\\d{0,2}(?:,\\d{3})+|\\d*))))(?:.\\d+|)$");
+                            Regex regex = new("^(?:-(?:[1-9](?:\\d{0,2}(?:,\\d{3})+|\\d*))|(?:0|(?:[1-9](?:\\d{0,2}(?:,\\d{3})+|\\d*))))(?:.\\d+|)$");
                             if (regex.IsMatch(columnData.ToString()??"0"))
                                 pro.SetValue(obj, Convert.ChangeType(columnData, pro.PropertyType), null);
                             else
@@ -98,7 +98,7 @@ namespace FoxProDbExtentionConnection
 
         private static List<T> ConvertToList<T>(this DataTable dt)
         {
-            List<T> data = new List<T>();
+            List<T> data = [];
             foreach (DataRow row in dt.Rows)
             {
                 T item = row.OnlyOne<T>();

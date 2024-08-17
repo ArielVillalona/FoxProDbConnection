@@ -17,15 +17,9 @@ namespace FoxProDbExtentionConnection
         /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
         public static IServiceCollection AddFoxDb([NotNull]this IServiceCollection services, [NotNull] Action<FoxDbOptions> connectionString)
         {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
+            ArgumentNullException.ThrowIfNull(services);
 
-            if (connectionString == null)
-            {
-                throw new ArgumentNullException(nameof(connectionString));
-            }
+            ArgumentNullException.ThrowIfNull(connectionString);
 
             services.Configure(connectionString);
             services.TryAdd(ServiceDescriptor.Scoped<IFoxDbContext, FoxDbContext>());
@@ -34,15 +28,9 @@ namespace FoxProDbExtentionConnection
 
         public static IServiceCollection AddFoxDb([NotNull] this IServiceCollection services, [NotNull] Action<IServiceProvider, FoxDbOptions> configuration)
         {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
+            ArgumentNullException.ThrowIfNull(services);
 
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
+            ArgumentNullException.ThrowIfNull(configuration);
 
             //services.Configure(configuration.);
             services.TryAdd(ServiceDescriptor.Scoped<IFoxDbContext, FoxDbContext>());
